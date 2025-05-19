@@ -33,12 +33,19 @@ function addStudentToTable(student){
     `<td>${student.name}</td>
      <td>${student.lastName}</td>
     <td>${student.grade}</td>
-    <td> <button class="delete">Eliminar</button></td>`;
+    <td> <button class="delete">Eliminar</button></td>
+    <td> <button class="delete">Editar</button></td>`;
+    
 row.querySelector(".delete").addEventListener("click",function(){
         deleteEstudiante(student,row);
     });
    tableBody.appendChild(row);
+row.querySelector(".edit").addEventListener("click",function(){
+        editEstudiante(student,row);
+    });
+   tableBody.appendChild(row);
 }
+
 
 function deleteEstudiante(student,row){
     const index=students.indexOf(student);
@@ -47,6 +54,26 @@ function deleteEstudiante(student,row){
         row.remove();
         calcularPromedio();
     }
+}
+// HAZ ESTA WEA BIEN XFAVOR
+function editEstudiante(student,row){
+    const index=students.indexOf(student)
+    if(index > -1){
+        const nuevoNombre = prompt("Cambiar nombre:", student.name);
+        const nuevoapellido = prompt("Cambiar apellido:", student.lastName);
+        const nuevaNota = parseFloat(prompt("Cambiar nota:", student.grade));
+        
+        if (nuevoNombre !== null && !isNaN(nuevaNota)) {
+            students[index].name = nuevoNombre; 
+            students[index].lastName = nuevoapellido;
+            students[index].grade = nuevaNota;
+            row.cells[0].textContent = nuevoNombre;
+            row.cells[1].textContent = nuevoapellido;
+            row.cells[2].textContent = nuevaNota;
+            calcularPromedio();} 
+        else {
+            alert("Edición cancelada o datos inválidos.");
+            calcularPromedio();}}
 }
 function calcularPromedio(){
     if(students.length===0){
