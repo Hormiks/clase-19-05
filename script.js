@@ -1,30 +1,37 @@
 const students=[];
+let editingIndex=-1;
 
 const tableBody=document.querySelector("#studentsTable tbody");
 const averageDiv=document.getElementById("average");
+const form=document.getElementById("studentForm");
+const submitButton=form.querySelector("button[type='submit']");
 
-document.getElementById("studentForm").addEventListener("submit",function(e){
-    e.preventDefault();
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
 
-    const name=document.getElementById("name").value.trim();
-    const lastName=document.getElementById("lastName").value.trim();
-    const grade=parseFloat(document.getElementById("grade").value.trim());
+  const name = document.getElementById("name").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const grade = parseFloat(document.getElementById("grade").value.trim());
 
-    if(grade <1 || grade >7 || !name || !lastName || isNaN(grade)){
-    alert("Error Datos Incorrectos")
-    return
-    }
+  if (grade<1 || grade>7 || !name || !lastName || isNaN(grade)) {
+    alert("Error: Datos Incorrectos");
+    return;
+  }
+  const student={name,lastName,grade};
 
-    //guardar datos en el Array nuevo
-
-    const student={name,lastName,grade};
+  if (editingIndex === -1){
     students.push(student);
-     addStudentToTable(student)
-     calcularPromedio()
-   // console.log(students)
+    addStudentToTable(student);
+  } 
+  else {
+    students[editingIndex]=student;
+    updateTable();
+    submitButton.textContent="Agregar Estudiante";
+    editingIndex=-1;
+  }
 
-    this.reset();
-
+  calcularPromedio();
+  form.reset();
 });
 
 function addStudentToTable(student){
@@ -33,19 +40,23 @@ function addStudentToTable(student){
     `<td>${student.name}</td>
      <td>${student.lastName}</td>
     <td>${student.grade}</td>
-    <td> <button class="delete">Eliminar</button></td>
-    <td> <button class="delete">Editar</button></td>`;
+    <td>
+        <button class="delete">Eliminar</button>
+        <button class="edit">Editar</button>
+    </td>`;
     
-row.querySelector(".delete").addEventListener("click",function(){
+    row.querySelector(".delete").addEventListener("click",function(){
         deleteEstudiante(student,row);
     });
-   tableBody.appendChild(row);
-row.querySelector(".edit").addEventListener("click",function(){
-        editEstudiante(student,row);
+    row.querySelector(".edit").addEventListener("click",function(){
+        editEstudiante(student);
     });
    tableBody.appendChild(row);
 }
-
+function updateTable(){
+    tableBody.innerHTML="";
+    students.forEach(addStudentToTable);
+}
 
 function deleteEstudiante(student,row){
     const index=students.indexOf(student);
@@ -55,25 +66,16 @@ function deleteEstudiante(student,row){
         calcularPromedio();
     }
 }
-// HAZ ESTA WEA BIEN XFAVOR
-function editEstudiante(student,row){
-    const index=students.indexOf(student)
+// intento de botón Actualizar
+function editEstudiante(student){
+    const index=students.indexOf(student);
     if(index > -1){
-        const nuevoNombre = prompt("Cambiar nombre:", student.name);
-        const nuevoapellido = prompt("Cambiar apellido:", student.lastName);
-        const nuevaNota = parseFloat(prompt("Cambiar nota:", student.grade));
-        
-        if (nuevoNombre !== null && !isNaN(nuevaNota)) {
-            students[index].name = nuevoNombre; 
-            students[index].lastName = nuevoapellido;
-            students[index].grade = nuevaNota;
-            row.cells[0].textContent = nuevoNombre;
-            row.cells[1].textContent = nuevoapellido;
-            row.cells[2].textContent = nuevaNota;
-            calcularPromedio();} 
-        else {
-            alert("Edición cancelada o datos inválidos.");
-            calcularPromedio();}}
+        document.getElementById("name").value=student.name;
+        document.getElementById("lastName").value=student.lastName;
+        document.getElementById("grade").value=student.grade;
+        editingIndex=index;
+        submitButton.textContent="Actualizar cambios";
+    }
 }
 function calcularPromedio(){
     if(students.length===0){
@@ -81,8 +83,7 @@ function calcularPromedio(){
         return;
     }
     const total=students.reduce((sum,s)=>sum+s.grade,0);
-    console.log(total)
     const average=total/students.length;
-    console.log(average)
+
     averageDiv.textContent=`Promedio de Calificaciones: ${average.toFixed(2)}`;
 }
